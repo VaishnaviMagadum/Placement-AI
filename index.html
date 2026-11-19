@@ -582,7 +582,7 @@ async function askOpenAI(prompt){
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":`Bearer ${API_KEY}`},
-      body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"user",content:prompt}],max_tokens:3000})
+      body:JSON.stringify({model:"openai/gpt-oss-20b",messages:[{role:"user",content:prompt}],max_tokens:3000})
     });
     
     const data = await res.json();
@@ -1110,7 +1110,7 @@ Answer in JSON format only: {"score": number, "suggestions": ["...","...","...",
         "Authorization": `Bearer ${API_KEY}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-20b",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 500
       })
