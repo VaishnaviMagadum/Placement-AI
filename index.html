@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PlacementAI - Student Dashboard</title>
+  <style>
+    /* BODY & BACKGROUND */
+    body {
+      background: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHRlc3R8ZW58MHx8MHx8fDA%3D') no-repeat center center fixed;
+      background-size: cover;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 0;
+    }
+
+   .container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
+
+  background: linear-gradient(135deg, #eef2ff, #f8fafc, #e0e7ff, #f0f5ff);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+    h2 { color: #4f46e5; text-align: center; margin-bottom: 25px; }
+    h3 { color: #4f46e5; margin-bottom: 15px; }
+
+    label { display: block; margin-top: 10px; font-weight: 600; }
+    input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #d1d5db; border-radius: 8px; transition: all 0.3s ease; }
+
+    button {
+      background: linear-gradient(90deg, #4f46e5, #2563eb);
+      color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 10px;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #2563eb, #1e3a8a);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .card {
+      background: white; padding: 20px; border-radius: 12px; margin-top: 15px; margin: 40px auto;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease ;margin: 20px auto;  /* centers it */
+      max-width: 800px; 
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 25px rgba(0,0,0,0.15); }
+
+    .step { display: none; animation: fadeIn 0.5s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .navBtns { display: flex; justify-content: space-between; margin-top: 15px; }
+    a { cursor: pointer; color: #4f46e5; text-decoration: underline; }
+    .centerBtn { display: block; margin: 15px auto 0; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+    th { background: #4f46e5; color: white; }
+
+    .company-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin-bottom: 8px; background: #f0f4ff; border-radius: 8px; transition: background 0.3s ease; }
+    .company-item:hover { background: #e0e7ff; }
+
+    #step-profile label, #step-profile input { width: 48%; display: inline-block; margin-right: 2%; }
+    #step-profile input:last-child { margin-right: 0; }
+  </style>
+</head>
+
+<body>
+  <!-- Fixed Timer -->
+  <div id="timer" style="
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.9);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: blue;
+    z-index: 9999;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    display: none;
+">Time Left: 00:00</div>
+
+<div class="container">
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+
+  <h2>PlacementAI - Student Dashboard</h2>
+
+  <!-- STEP 0: Login -->
+  <div id="step-login" class="step">
+    <h3 style="text-align:center; color:#2563eb;">Login</h3>
+    <label>Username</label>
+    <input id="loginUsername" type="text" placeholder="Enter username" />
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Enter password" />
+    <label>Role</label>
+    <select id="loginRole">
+      <option value="student">Student</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button id="loginBtn">Login</button>
+    <div class="forgot">
+  <button id="resetAdminBtn">Forgot Admin Password?</button>
+  <p id="resetMsg"></p>
+</div>
+    <p id="loginError" style="color:red; font-size:14px;"></p>
+    <p style="margin-top:10px;">Don't have an account? <a id="goToRegister">Register here</a></p>
+  </div>
+
+
+  <!-- STEP 1: Register -->
+  <div id="step-register" class="step">
+    <h3 style="text-align:center; color:#2563eb;">Register</h3>
+    <label>Username</label>
+    <input id="regUsername" type="text" placeholder="Enter username" />
+    <label>Password</label>
+    <input id="regPassword" type="password" placeholder="Enter password" />
+    <label>Role</label>
+    <select id="regRole">
+      <option value="student">Student</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button id="registerBtn">Register</button>
+    <p id="regError" style="color:red; font-size:14px;"></p>
+    <p style="margin-top:10px;">Already have an account? <a id="goToLogin">Login here</a></p>
+  </div>
+
+  <!-- STEP 2: Profile -->
+  <div id="step-profile" class="step">
+    <div id="srnContainer">
+      <label>USN (University Serial Number)</label>
+      <input id="regSRN" type="text" placeholder="e.g. 2HN22CS001" />
+    </div>
+    <label>Course</label>
+    <input id="Course" type="text" placeholder="e.g. CSE" />
+    <label>CGPA</label>
+    <input id="CGPA" type="number" step="0.1" placeholder="e.g. 7.5" />
+    <label>Skills</label>
+    <textarea id="Skills" placeholder="e.g. Python, Java, SQL"></textarea>
+    <label>Role</label>
+    <input type="text" id="Role" placeholder="Enter your role">
+
+    <button id="editProfileBtn">Edit Profile</button>
+    <button id="saveProfileBtn">Save Profile</button>
+
+    <div class="navBtns">
+      <button class="backBtn">⬅ Logout / Back</button>
+      <button class="nextBtn">Next ➡</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Companies -->
+  <div id="step-companies" class="step">
+  <div class="card">
+    <strong>Suggested Companies</strong>
+    <div id="companyList" style="margin-top:10px;">🔍 Finding the best companies for your profile...</div>
+  </div>
+  <div class="navBtns">
+    <button class="backBtn">⬅ Back</button>
+  </div>
+</div>
+
+  <!-- STEP 4: Mock Test Section Selection -->
+  <div id="step-test" class="step">
+    <div class="card">
+      <strong>Mock Test Sections</strong>
+      <div id="testTabs" style="margin:15px 0;">
+        <button class="testTab" data-section="aptitude">Aptitude</button>
+        <button class="testTab" data-section="coding">Coding/Programming</button>
+        <button class="testTab" data-section="communication">Communication & Soft Skills</button>
+        <button class="testTab" data-section="hr">HR Questions</button>
+      </div>
+      <div class="navBtns">
+        <button class="backBtn">⬅ Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Test Page -->
+<div id="step-testpage" class="step">
+  <div class="card">
+    <h3 id="testTitle"></h3>
+    <!-- Timer Display -->
+
+    <form id="mockForm"></form>
+
+    <button id="submitTestBtn" class="centerBtn">Submit Test</button>
+  </div>
+  <div class="navBtns">
+    <button class="backBtn">⬅ Back</button>
+  </div>
+</div>
+
+  <!-- STEP 6: Results -->
+  <div id="step-result" class="step">
+    <div class="card">
+      <strong>Result</strong>
+      <div id="resultContent"></div>
+      <button id="improveBtn" class="centerBtn">Get Improvement Suggestions</button>
+    </div>
+  </div>
+
+  <!-- STEP 7: Improvement Suggestions -->
+  <div id="step-improve" class="step">
+    <div class="card">
+      <strong>Improvement Suggestions</strong>
+      <div id="improvementContent" style="margin-top:10px;"></div>
+    </div>
+    <div class="navBtns">
+      <button class="backBtn">⬅ Back</button>
+    </div>
+  </div>
+
+  <!-- STEP 8: Admin Dashboard -->
+  <div id="step-admin" class="step">
+    <div class="card">
+      <h3>Admin Dashboard</h3>
+      <p>Welcome Admin! Manage students below:</p>
+      <table id="adminStudentTable">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>USN</th>
+            <th>Course</th>
+            <th>CGPA</th>
+            <th>Skills</th>
+            <th>Role</th> 
+            <th>Score</th>
+            <th>Company</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button onclick="clearAllData()" style="margin-top:15px; background:#dc2626; color:white; border:none; padding:10px 15px; border-radius:6px; cursor:pointer;">
+        ⚠️ Clear All Data
+      </button>
+      <button class="backBtn" style="margin-top:10px;">Logout / Back</button>
+    </div>
+  </div>
+  <!-- STEP-DASHBOARD: Student Main Page -->
+<div id="step-student-dashboard" class="step">
+  <h3 style="text-align:center; color:#2563eb;">Student Dashboard</h3>
+  <div class="card">
+    <button id="goCompaniesBtn" class="centerBtn" style="margin-bottom:15px;">Get Company Suggestions</button>
+    <button id="goResumeBtn" class="centerBtn">Resume Score Checker</button>
+  </div>
+  <div class="navBtns">
+    <button class="backBtn">⬅ Back </button>
+  </div>
+</div>
+</div>
+
+
+<!-- STEP 9: Resume Score Checker -->
+<div id="step-resume" class="step">
+  <div class="card">
+    <h3>Resume Score Checker</h3>
+    <label>Upload your resume (TXT or PDF):</label>
+    <input type="file" id="resumeFile" accept=".txt,.pdf" />
+    <button id="checkResumeBtn" class="centerBtn">Check Resume</button>
+    <div id="resumeScore" style="margin-top:15px; font-weight:bold;"></div>
+    <div id="resumeSuggestions" style="margin-top:10px;"></div>
+  </div>
+  <div class="navBtns">
+    <button class="backBtn">⬅ Back</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+</script>
+<script>
+const API_KEY = "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";
+
+// Self-heal corrupted localStorage data
+try {
+  let initUsers = JSON.parse(localStorage.getItem("users") || "{}");
+  if (typeof initUsers !== "object" || initUsers === null || Array.isArray(initUsers)) {
+    localStorage.setItem("users", "{}");
+  }
+} catch(e) {
+  localStorage.setItem("users", "{}");
+}
+
+function showStep(stepId){
+  document.querySelectorAll('.step').forEach(s=>s.style.display='none');
+  document.getElementById(stepId).style.display='block';
+
+  const timerEl = document.getElementById("timer");
+  if(timerEl) timerEl.style.display = (stepId === "step-testpage") ? "block" : "none";
+
+  if(stepId === "step-admin") loadAdminData();
+  if(stepId === "step-companies") showCompanies();
+}
+
+showStep("step-login");
+
+
+document.getElementById("goToRegister").onclick = ()=>showStep("step-register");
+document.getElementById("goToLogin").onclick = ()=>showStep("step-login");
+
+
+document.getElementById("registerBtn").onclick = () => {
+  const username = document.getElementById("regUsername").value.trim().toLowerCase();
+  const password = document.getElementById("regPassword").value.trim();
+  const role = document.getElementById("regRole").value;
+  const regError = document.getElementById("regError");
+
+  if (!username || !password) {
+    regError.style.color = "red";
+    regError.textContent = "Please fill in all fields.";
+    return;
+  }
+
+ 
+  let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+  
+  const admins = Object.entries(users).filter(([name, info]) => info.role === "admin");
+
+  if (role === "admin" && admins.length > 0) {
+    regError.style.color = "red";
+    regError.textContent = "Only the main administrator can have admin access. Please register as a student.";
+    return;
+  }
+
+  
+  if (users[username]) {
+    regError.style.color = "red";
+    regError.textContent = "This username already exists. Try another.";
+    return;
+  }
+
+  // Register user
+  users[username] = { password, role };
+  localStorage.setItem("users", JSON.stringify(users));
+
+  regError.style.color = "green";
+  regError.textContent = "Registration successful! Redirecting...";
+  
+  // Auto-fill login fields for convenience
+  document.getElementById("loginUsername").value = username;
+  document.getElementById("loginPassword").value = password;
+  
+  setTimeout(() => showStep("step-login"), 1500);
+};
+
+
+// Login
+document.getElementById("loginBtn").onclick = () => {
+  const username = document.getElementById("loginUsername").value.trim().toLowerCase();
+  const password = document.getElementById("loginPassword").value.trim();
+  const role = document.getElementById("loginRole").value;
+
+  const users = JSON.parse(localStorage.getItem("users") || "{}");
+  const loginError = document.getElementById("loginError");
+
+  if (!username || !password) {
+    loginError.textContent = "Please fill in all fields.";
+    return;
+  }
+
+  // user not found
+  if (!users[username]) {
+    const existingUsers = Object.keys(users).join(", ") || "none";
+    loginError.textContent = `User '${username}' does not exist. (Registered: ${existingUsers})`;
+    return;
+  }
+
+  // wrong password
+  if (users[username].password !== password) {
+    loginError.textContent = "Incorrect password.";
+    return;
+  }
+
+  // ✅ ADMIN LOGIN VALIDATION
+  if (role === "admin") {
+    if (users[username].role !== "admin") {
+      loginError.textContent = "You are not registered as an admin.";
+      return;
+    }
+    // Correct admin login
+    localStorage.setItem("currentUser", username);
+    showStep("step-admin");
+    return;
+  }
+
+  // ✅ STUDENT LOGIN VALIDATION
+  if (role === "student") {
+    if (users[username].role !== "student") {
+      loginError.textContent = "This account is not a student account.";
+      return;
+    }
+
+    localStorage.setItem("currentUser", username);
+
+    const profile = JSON.parse(localStorage.getItem(`profile_${username}`) || "{}");
+
+    if (!profile.regSRN || !profile.course || !profile.cgpa || !profile.skills)
+      showStep("step-profile");
+    else
+      showStep("step-student-dashboard");
+
+    return;
+  }
+};
+
+
+
+// Next/Back buttons
+document.querySelectorAll('.nextBtn').forEach(btn=>btn.addEventListener('click', ()=>{
+  const current = btn.closest('.step').id;
+  const currentUser = localStorage.getItem("currentUser");
+  if(current==="step-profile"){
+    const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`)||"{}");
+    if(!profile.regSRN || !profile.course || !profile.cgpa || !profile.skills){ alert("Fill profile"); return; }
+    showStep("step-companies");
+  } else if(current==="step-companies") showStep("step-student-dashboard");
+}));
+
+
+
+// Back buttons
+document.querySelectorAll('.backBtn').forEach(btn => btn.addEventListener('click', () => {
+  const current = btn.closest('.step').id;
+
+  if(current === "step-profile") showStep("step-login");                // Profile → Login
+  else if(current === "step-companies") showStep("step-profile");       // Companies → Profile
+  else if(current === "step-test") showStep("step-companies");          // Test section → Companies
+  else if(current === "step-result") showStep("step-testpage");         // Results → Test page
+  else if(current === "step-testpage") showStep("step-test");           // Test page → Test section
+  else if(current === "step-improve") showStep("step-result");          // Improvement → Result
+  else if(current === "step-student-dashboard") showStep("step-profile"); // Dashboard → Profile
+  else if(current === "step-admin") showStep("step-login");             // Admin → Login
+  else if(current === "step-resume") showStep("step-student-dashboard"); //Resume checker -> Companies
+}));
+
+// Next buttons
+document.querySelectorAll('.nextBtn').forEach(btn => btn.addEventListener('click', () => {
+  const current = btn.closest('.step').id;
+  const currentUser = localStorage.getItem("currentUser");
+
+  if(current === "step-profile") {
+    const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`) || "{}");
+    if(!profile.regSRN || !profile.course || !profile.cgpa || !profile.skills){
+      alert("Fill all profile fields first!");
+      return;
+    }
+    showStep("step-student-dashboard"); // Profile → Dashboard
+  } else if(current === "step-companies") showStep("step-student-dashboard"); // Companies → Dashboard
+}));
+
+
+// Save/Edit Profile
+document.getElementById("saveProfileBtn").onclick = ()=>{
+  const regSRN=document.getElementById("regSRN").value.trim();
+  const course=document.getElementById("Course").value.trim();
+  const cgpa=document.getElementById("CGPA").value.trim();
+  const skills=document.getElementById("Skills").value.trim();
+  const role=document.getElementById("Role").value.trim();
+  const currentUser=localStorage.getItem("currentUser");
+  if(!regSRN || !course || !cgpa || !skills || !role){
+      alert("Fill all fields");
+      return;
+  }
+  if(isNaN(cgpa)||cgpa<0||cgpa>10){ alert("Enter valid CGPA"); return; }
+  localStorage.setItem(`profile_${currentUser}`, JSON.stringify({regSRN,course,cgpa,skills,role}));
+  alert("Profile saved!");
+  document.getElementById("regSRN").disabled=true;
+  document.getElementById("Course").disabled=true;
+  document.getElementById("CGPA").disabled=true;
+  document.getElementById("Skills").disabled=true;
+  document.getElementById("saveProfileBtn").style.display="none";
+  showStep("step-student-dashboard"); 
+};
+
+document.getElementById("editProfileBtn").onclick = ()=>{
+  const currentUser=localStorage.getItem("currentUser");
+  const profile=JSON.parse(localStorage.getItem(`profile_${currentUser}`)||"{}");
+  if(!profile.regSRN){ alert("No profile found"); return; }
+  document.getElementById("regSRN").disabled=false;
+  document.getElementById("Course").disabled=false;
+  document.getElementById("CGPA").disabled=false;
+  document.getElementById("Skills").disabled=false;
+  document.getElementById("saveProfileBtn").style.display="inline-block";
+  document.getElementById("regSRN").value=profile.regSRN;
+  document.getElementById("Course").value=profile.course;
+  document.getElementById("CGPA").value=profile.cgpa;
+  document.getElementById("Skills").value=profile.skills;
+  document.getElementById("Role").value=profile.role;
+};
+
+
+function selectCompany(company){
+  const currentUser = localStorage.getItem("currentUser");
+  const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`)||"{}");
+  profile.selectedCompany = company;
+  localStorage.setItem(`profile_${currentUser}`, JSON.stringify(profile));
+  alert(`Company ${company} selected!`);
+
+ 
+  const form = document.getElementById("mockForm");
+  form.setAttribute("data-company", company); // store company in form attribute
+
+  showStep("step-test");
+}
+
+
+// Admin
+function loadAdminData(){
+  const tbody=document.querySelector("#adminStudentTable tbody");
+  tbody.innerHTML="";
+  const users=JSON.parse(localStorage.getItem("users")||"{}");
+  const scores=JSON.parse(localStorage.getItem("scores")||"{}");
+  Object.keys(users).forEach(u=>{
+    if(users[u].role==="student"){
+      const profile=JSON.parse(localStorage.getItem(`profile_${u}`)||"{}");
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${u}</td>
+<td>${profile.regSRN||""}</td>
+<td>${profile.course||""}</td>
+<td>${profile.cgpa||""}</td>
+<td>${profile.skills||""}</td>
+<td>${profile.role||""}</td>
+<td>${scores[u]?scores[u].score:"-"}</td>
+<td>${scores[u]?scores[u].company:"-"}</td>
+<td>
+  <button onclick="deleteStudent('${u}')">Delete</button>
+  <button onclick="resetPassword('${u}')">Reset Password</button>
+</td>`;
+
+      tbody.appendChild(tr);
+    }
+  });
+}
+function deleteStudent(u){ if(confirm(`Delete ${u}?`)){ const users=JSON.parse(localStorage.getItem("users")||"{}"); delete users[u]; localStorage.setItem("users",JSON.stringify(users)); localStorage.removeItem(`profile_${u}`); const scores=JSON.parse(localStorage.getItem("scores")||"{}"); delete scores[u]; localStorage.setItem("scores",JSON.stringify(scores)); loadAdminData(); } }
+function clearAllData(){ if(confirm("Delete ALL data?")){ localStorage.clear(); showStep("step-login"); alert("All data cleared."); } }
+function resetPassword(username){
+  const newPass = prompt(`Enter new password for ${username}:`);
+  if(!newPass) return; // cancel
+
+  const users = JSON.parse(localStorage.getItem("users") || "{}");
+  if(!users[username]){
+    alert("User not found!");
+    return;
+  }
+
+  users[username].password = newPass;
+  localStorage.setItem("users", JSON.stringify(users));
+  alert(`Password for ${username} has been reset successfully.`);
+}
+
+
+async function askOpenAI(prompt){
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":`Bearer ${API_KEY}`},
+      body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"user",content:prompt}],max_tokens:3000})
+    });
+    
+    const data = await res.json();
+    
+    // Check if Groq sent an error back instead of the answer
+    if (data.error) {
+      alert("Groq API Error: " + data.error.message);
+      throw new Error(data.error.message);
+    }
+    
+    return data.choices[0].message.content;
+  } catch (err) {
+    alert("Error: " + err.message);
+    throw err;
+  }
+}
+
+
+async function showCompanies() {
+  const currentUser = localStorage.getItem("currentUser");
+  const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`) || "{}");
+  const listDiv = document.getElementById("companyList");
+  listDiv.innerHTML = "🔍 Finding the best companies for your profile...";
+
+  const prompt = `
+Suggest 5-10 suitable companies for placement based on the following student profile:
+Course: ${profile.course || "N/A"}
+CGPA: ${profile.cgpa || "N/A"}
+Skills: ${profile.skills || "N/A"}
+Role: ${profile.role || "N/A"}
+Give only company names in a list format, no other text.
+`;
+
+  try {
+    const companiesText = await askOpenAI(prompt);
+    const companies = companiesText
+      .split(/\n/)
+      .map(c => c.trim())
+      .filter(c => c !== "")
+      .map(c => c.replace(/^\d+\.\s*/, "")); 
+
+    if (companies.length === 0) {
+      listDiv.innerHTML = "No suggestions available.";
+      return;
+    }
+
+    listDiv.innerHTML = companies.map(c => `
+      <div class="company-item">
+        ${c} <button onclick="selectCompany('${c}')">Select</button>
+      </div>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+    listDiv.innerHTML = "Failed to generate suggestions.";
+  }
+}
+
+
+async function loadSectionQuestions(section){
+  const currentUser = localStorage.getItem("currentUser");
+  const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`) || "{}");
+  const mockForm = document.getElementById("mockForm");
+  const company = mockForm.getAttribute("data-company") || profile.selectedCompany || "any company";
+
+  mockForm.innerHTML = "";
+  window.correctAnswers = {};
+
+
+  const profileInfo = `
+Student Profile:
+Course: ${profile.course || "N/A"}
+CGPA: ${profile.cgpa || "N/A"}
+Skills: ${profile.skills || "N/A"}
+Role: ${profile.role || "N/A"}
+Company: ${company || "any company"}
+`;
+
+  let prompt = "";
+
+  if (section === "aptitude") {
+    prompt = `${profileInfo}
+Generate exactly 5 aptitude MCQ questions ONLY from these topics:
+- Quantitative aptitude
+- Logical reasoning
+- Percentages
+- Ratios & proportions
+- Time–speed–distance
+- Probability
+- Averages
+- Puzzles
+
+STRICT RULES:
+1. Do NOT include any programming, coding, Python, Java, algorithms, or technical topics.
+2. Questions must be purely aptitude-based.
+3. Provide ONLY the MCQs in the following exact format:
+
+1. Question text
+A. option1
+B. option2
+C. option3
+D. option4
+Answer: A/B/C/D`;
+}
+
+
+ else if (section === "coding") {
+    prompt = `${profileInfo}
+Generate EXACTLY 5 programming MCQ questions.
+STRICT RULES:
+1. Number the questions 1 to 5.
+2. Each question MUST follow the format:
+   1. Question text
+   A. option1
+   B. option2
+   C. option3
+   D. option4
+   Answer: A/B/C/D
+3. DO NOT generate fewer or more than 10 questions.
+
+ Course,Skills,Role-Specific Topics to include:
+ -CSE:
+- Basic DSA
+- Basic algorithms
+- Time complexity
+- Loops & functions
+- Recursion
+- Arrays & strings
+- Logic building
+-ECE:
+- Basic IOT
+- Basic Embedded Systems related questions
+- Basic Computer Networks
+- Basic VLSI concepts
+- Loops & functions
+- Recursion
+- Arrays & strings
+- Logic building
+- EEE:
+-Power Calculations
+-Basic IOT
+- Basic Embedded Systems related questions
+- Basic Computer Networks
+- Basic VLSI concepts
+-ohm's law and circuit analysis
+-Loops & functions
+- Recursion
+- Arrays & strings
+- Logic building
+-AI/ML:
+-Basic DSA
+- Basic algorithms
+- Time complexity
+-Loops & functions
+- Recursion
+- Arrays & strings
+- Logic building
+- Basic AI/ML concepts`;
+}
+
+
+ else if (section === "communication") {
+    prompt = `${profileInfo}
+Generate EXACTLY 10 communication & soft-skills MCQ questions.
+STRICT RULES:
+1. Start numbering from 1 (NO text before question 1).
+2. Number questions 1 to 5 only.
+3. Each question MUST follow this format:
+   1. Question text
+   A. option1
+   B. option2
+   C. option3
+   D. option4
+   Answer: A/B/C/D
+
+Topics:
+- Grammar
+- Vocabulary
+- Sentence correction
+- Workplace communication
+- Professional etiquette`;
+}
+
+
+  else if (section === "hr") {
+    prompt = `
+Generate exactly 3 HR interview questions.
+
+RULES:
+1. The FIRST question must ALWAYS be: "Tell me about yourself."
+2. The remaining questions (Q2 to Q3) should be standard HR round questions like strengths, weaknesses, leadership, conflict handling, teamwork, goals, etc.
+3. Number questions from 1 to 3.
+4. Do NOT give MCQs. Only provide the questions.
+
+Format:
+1. Tell me about yourself.
+2. ...
+3. ...
+...
+10. ...
+`;
+}
+
+
+
+  const result = await askOpenAI(prompt);
+
+  
+const questions = result.split(/\n(?=\d+\.)/);
+
+
+// HR SECTION → custom rendering
+if (section === "hr") {
+    
+    window.hrQuestions = questions.map(q =>
+        q.replace(/^\d+\.\s*/, "").trim()
+    );
+
+    window.currentHR = 0;
+
+    mockForm.innerHTML = `
+        <p><strong>HR Round Question 1:</strong> ${window.hrQuestions[0]}</p>
+        <textarea id="hrAnswer" placeholder="Type your answer here..." style="width:100%;height:120px;"></textarea>
+        <button id="submitHRAnswerBtn">Submit Answer</button>
+    `;
+
+    speak(window.hrQuestions[0]); 
+    return; 
+}
+
+// ✅ NON-HR sections continue with normal MCQ flow
+questions.forEach((block, i) => {
+    const lines = block.trim().split("\n").map(l => l.trim()).filter(l => l !== "");
+    const questionLine = lines.find(l => /^\d+\./.test(l));
+    if (!questionLine) return;
+
+    const questionText = questionLine.replace(/^\d+\.\s*/, "");
+    const options = lines.filter(l => /^[A-D]\./.test(l));
+    const answerLine = lines.find(l => /^Answer:/i.test(l));
+    const correct = answerLine ? answerLine.split(":")[1].trim().toUpperCase() : null;
+    if (correct) window.correctAnswers[`q${i}`] = correct;
+
+    const div = document.createElement("div");
+    div.style.marginBottom = "20px";
+    div.innerHTML = `<p><strong>${i + 1}. ${questionText}</strong></p>` +
+        options.map(opt => {
+            const letter = opt.charAt(0).toUpperCase();
+            return `<div style="margin-left:25px; margin-top:5px;">
+                        <label><input type="radio" name="q${i}" value="${letter}"> ${opt}</label>
+                    </div>`;
+        }).join("");
+
+    mockForm.appendChild(div);
+});
+
+}
+
+let timerInterval; 
+
+function startTimer(duration) {
+  clearInterval(timerInterval); 
+  let timeLeft = duration;
+
+  function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const timerEl = document.getElementById("timer");
+
+    
+    if (timeLeft > 60) {
+      timerEl.style.color = "blue";   
+    } else if (timeLeft <= 60 && timeLeft > 10) {
+      timerEl.style.color = "red";     
+    } else {
+      timerEl.style.color = "darkred"; 
+    }
+
+    
+    timerEl.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      alert("Time is up! Submitting your test...");
+      document.getElementById("submitTestBtn").click();
+    }
+
+    timeLeft--;
+  }
+
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+
+document.querySelectorAll(".testTab").forEach(btn=>{
+  btn.addEventListener("click", async ()=>{
+    const section = btn.dataset.section;
+    const form = document.getElementById("mockForm");
+    const profile = JSON.parse(localStorage.getItem(`profile_${localStorage.getItem("currentUser")}`)||"{}");
+    const company = form.getAttribute("data-company") || profile.selectedCompany || "any company";
+
+    document.getElementById("testTitle").textContent = `${section.toUpperCase()} - Mock Test (${company})`;
+    await loadSectionQuestions(section);
+
+    
+    const timerEl = document.getElementById("timer");
+    timerEl.style.display = "block";  // <-- show timer
+
+    // Start timer based on section
+    if (section === "aptitude") startTimer(300);        // 5 min
+    else if (section === "coding") startTimer(300);     // 5 min
+    else if (section === "communication") startTimer(300);
+    else if (section === "hr") startTimer(300);
+
+    showStep("step-testpage");
+  });
+});
+
+
+
+document.getElementById("submitTestBtn").onclick = () => {
+  clearInterval(timerInterval); 
+  const currentUser = localStorage.getItem("currentUser");
+  const form = document.getElementById("mockForm");
+  const company = form.getAttribute("data-company") || "any company";
+  let score = 0;
+  const total = Object.keys(window.correctAnswers).length;
+
+  Object.keys(window.correctAnswers).forEach(q => {
+    const selected = form.querySelector(`input[name="${q}"]:checked`);
+    const correct = window.correctAnswers[q];
+
+    
+    form.querySelectorAll(`input[name="${q}"]`).forEach(input => {
+      const parentLabel = input.closest("label");
+      parentLabel.style.background = ""; 
+
+      if (input.value === correct) {
+        parentLabel.style.background = "#d4edda"; 
+      } 
+      if (selected && input === selected && input.value !== correct) {
+        parentLabel.style.background = "#f8d7da"; 
+      }
+    });
+
+    if (selected && selected.value === correct) score++;
+  });
+
+  const allScores = JSON.parse(localStorage.getItem("scores") || "{}");
+  allScores[currentUser] = {
+    score,
+    total,
+    company,
+    section: document.getElementById("testTitle").textContent.split(" ")[0].toLowerCase()
+};
+
+  localStorage.setItem("scores", JSON.stringify(allScores));
+
+  document.getElementById("resultContent").innerHTML = `
+    You scored <strong>${score}/${total}</strong> for <strong>${company}</strong>
+  `;
+
+  // Add back button to go to test page
+  document.getElementById("resultContent").innerHTML += `
+    <div style="margin-top:15px;">
+      <button id="backToTestBtn" style="padding:8px 12px; border:none; border-radius:6px; background:#4f46e5; color:white; cursor:pointer;">
+        ⬅ Back to Test
+      </button>
+    </div>
+  `;
+
+  // Back button functionality
+  document.getElementById("backToTestBtn").onclick = () => {
+    showStep("step-testpage");
+  };
+
+  showStep("step-result");
+};
+
+// Improvement suggestions
+document.getElementById("improveBtn").onclick = async () => {
+  const currentUser = localStorage.getItem("currentUser");
+  const scores = JSON.parse(localStorage.getItem("scores") || "{}");
+  const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`) || "{}");
+  const score = scores[currentUser]?.score || 0;
+  const total = scores[currentUser]?.total || 0;
+
+  const prompt = `
+You are a placement preparation coach.
+
+The student attempted a mock test for the section: "${scores[currentUser].section || "unknown"}"
+
+Score: ${score}/${total}
+
+Generate exactly 5 improvement suggestions based ONLY on the test section:
+
+- If section = "aptitude":
+  Focus on quantitative aptitude, logical reasoning, problem-solving, arithmetic, percentages, averages, ratios, probability, puzzles.
+  DO NOT give any coding or programming suggestions.
+
+- If section = "coding":
+  Focus on programming, DSA, logic building, time complexity,Networking,VLSI.
+
+- If section = "communication":
+  Focus on grammar, vocabulary, communication style, sentence correction.
+
+- If section = "hr":
+  Focus on behavioural answers, confidence, clarity, STAR method.
+
+Return output strictly in JSON format:
+{
+  "suggestions": [
+    "First suggestion",
+    "Second suggestion",
+    "Third suggestion",
+    "Fourth suggestion",
+    "Fifth suggestion"
+  ]
+}
+`;
+
+
+  try {
+    const suggestionsText = await askOpenAI(prompt);
+
+    // Extract JSON from AI response
+    const jsonMatch = suggestionsText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      alert("Failed to parse suggestions. Try again.");
+      console.log("Raw response:", suggestionsText);
+      return;
+    }
+
+    let result;
+    try { result = JSON.parse(jsonMatch[0]); } 
+    catch (e) { alert("Failed to parse JSON"); console.error(e); return; }
+
+    
+    document.getElementById("improvementContent").innerHTML = `
+      <ol style="padding-left:20px; line-height:1.6; font-size:15px;">
+        ${result.suggestions.map(s => `<li>${s}</li>`).join("")}
+      </ol>
+    `;
+
+    showStep("step-improve");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to fetch improvement suggestions.");
+  }
+};
+
+
+// Student Dashboard buttons
+document.getElementById("goCompaniesBtn").onclick = () => {
+  showStep("step-companies"); 
+};
+
+document.getElementById("goResumeBtn").onclick = () => {
+  showStep("step-resume"); 
+};
+
+// Handle resume file upload
+let resumeContent = "";
+
+document.getElementById("resumeFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.type === "application/pdf") {
+    document.getElementById("resumeScore").innerHTML = "<span style='color:blue;'>Extracting PDF text, please wait...</span>";
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+      let text = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(" ") + "\n";
+      }
+      resumeContent = text;
+      document.getElementById("resumeScore").innerHTML = "<span style='color:green;'>PDF loaded successfully! You can now click Check Resume.</span>";
+    } catch(err) {
+      alert("Failed to read PDF. " + err.message);
+      document.getElementById("resumeScore").innerHTML = "";
+    }
+  } else {
+    resumeContent = await file.text();
+    document.getElementById("resumeScore").innerHTML = "<span style='color:green;'>Text file loaded! You can now click Check Resume.</span>";
+  }
+});
+
+// Check resume button
+document.getElementById("checkResumeBtn").addEventListener("click", async () => {
+  if (!resumeContent) {
+    alert("Please upload your resume first.");
+    return;
+  }
+
+  const currentUser = localStorage.getItem("currentUser");
+  const profile = JSON.parse(localStorage.getItem(`profile_${currentUser}`) || "{}");
+
+  const prompt = `
+You are a career coach. Evaluate this resume:
+
+Resume Content:
+${resumeContent}
+
+Student Profile:
+Course: ${profile.course || "N/A"}
+CGPA: ${profile.cgpa || "N/A"}
+Skills: ${profile.skills || "N/A"}
+Role: ${profile.role || "N/A"}
+
+1. Give a score out of 10.
+2. Provide 5 improvement suggestions.
+Answer in JSON format only: {"score": number, "suggestions": ["...","...","...","...","..."]}
+`;
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 500
+      })
+    });
+
+    const data = await res.json();
+    
+    if (data.error) {
+      alert("Groq API Error: " + data.error.message);
+      return;
+    }
+
+    let resultText = data.choices[0].message.content;
+
+    // Extract JSON from response (in case there is extra text)
+    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      alert("Failed to extract JSON from response.");
+      console.log("Raw response:", resultText);
+      return;
+    }
+
+    let result;
+    try {
+      result = JSON.parse(jsonMatch[0]);
+    } catch (e) {
+      alert("Failed to parse JSON from response.");
+      console.error(e, resultText);
+      return;
+    }
+
+  
+const percentage = (result.score / 10) * 100;
+document.getElementById("resumeScore").textContent = `Resume Score: ${percentage}%`;
+    document.getElementById("resumeSuggestions").innerHTML =
+      `<strong>Suggestions:</strong><ul>${result.suggestions.map(s => `<li>${s}</li>`).join("")}</ul>`;
+  } catch (err) {
+    console.error(err);
+    alert("Failed to evaluate resume.");
+  }
+});
+
+// Forgot Admin Password (secured with reset code)
+document.getElementById("resetAdminBtn").onclick = () => {
+  const resetMsg = document.getElementById("resetMsg");
+  const users = JSON.parse(localStorage.getItem("users") || "{}");
+  const adminEntry = Object.entries(users).find(([name, info]) => info.role === "admin");
+
+  if (!adminEntry) {
+    resetMsg.style.color = "red";
+    resetMsg.textContent = "No admin account found.";
+    return;
+  }
+
+  // ✅ Add your secret reset code here — only you should know this
+  const MASTER_RESET_CODE = "PLACEMENTAI2025";
+
+  // Ask for secret code before allowing reset
+  const resetCode = prompt("Enter admin reset code:");
+  if (resetCode !== MASTER_RESET_CODE) {
+    resetMsg.style.color = "red";
+    resetMsg.textContent = "Invalid reset code! Only the system admin can reset the password.";
+    return;
+  }
+
+ 
+  const [adminName, adminInfo] = adminEntry;
+  const newPass = prompt("Enter new password for admin account (" + adminName + "):");
+
+  if (!newPass) {
+    resetMsg.style.color = "red";
+    resetMsg.textContent = "Password reset cancelled.";
+    return;
+  }
+
+  users[adminName].password = newPass;
+  localStorage.setItem("users", JSON.stringify(users));
+
+  resetMsg.style.color = "green";
+  resetMsg.textContent = "Admin password reset successful! You can now log in with the new password.";
+};
+
+document.addEventListener("click", async (e) => {
+  if (e.target && e.target.id === "submitHRAnswerBtn") {
+    clearInterval(timerInterval);  
+
+    e.preventDefault();   
+
+    const answer = document.getElementById("hrAnswer").value.trim();
+    if (!answer) {
+      alert("Please type an answer.");
+      return;
+    }
+
+    const question = window.hrQuestions[window.currentHR];
+
+    const prompt = `
+You are acting as an HR interviewer.
+
+HR Question: ${question}
+Candidate Answer: ${answer}
+
+Give evaluation as an interviewer, not like an AI system.  
+Examples:
+- "Your answer is not strong because..."
+- "You should improve by..."
+- "Your response was good / weak / incomplete..."
+
+Return the response exactly in this JSON format:
+
+{
+  "evaluation": "Interviewer-style short evaluation of the candidate’s answer.",
+  "suggestions": [
+    "First suggestion (direct, interviewer tone)",
+    "Second suggestion",
+    "Third suggestion"
+  ]
+}`;
+
+
+    const response = await askOpenAI(prompt);
+
+    let result;
+    try {
+      result = JSON.parse(response.match(/\{[\s\S]*\}/)[0]);
+    } catch (error) {
+      alert("AI response error");
+      console.log(response);
+      return;
+    }
+
+    mockForm.innerHTML = `
+      <p><strong>Evaluation:</strong> ${result.evaluation}</p>
+      <p><strong>Suggestions:</strong></p>
+      <ul>${result.suggestions.map(s => `<li>${s}</li>`).join("")}</ul>
+    `;
+
+    speak(result.evaluation + ". " + result.suggestions.join(". "));
+
+
+    
+mockForm.innerHTML += `
+    <br>
+    <button id="nextHRQuestionBtn">Next Question</button>
+`;
+
+// Add button handler
+document.getElementById("nextHRQuestionBtn").onclick = () => {
+  speechSynthesis.cancel();   
+
+    window.currentHR++;
+
+    if (window.currentHR >= window.hrQuestions.length) {
+        mockForm.innerHTML = `
+          <h3>You have completed all 3 HR interview questions!</h3>
+          <p>Great job!</p>
+        `;
+        speak("You have completed all 3 questions. Great job!");
+        return;
+    }
+
+    mockForm.innerHTML = `
+        <p><strong>HR Round Question ${window.currentHR + 1}:</strong> 
+        ${window.hrQuestions[window.currentHR]}</p>
+        <textarea id="hrAnswer" placeholder="Type your answer..." style="width:100%;height:120px;"></textarea>
+        <button id="submitHRAnswerBtn">Submit Answer</button>
+    `;
+
+    speak(window.hrQuestions[window.currentHR]);
+    startTimer(300); 
+};
+
+  }
+});
+
+
+function speak(text) {
+  speechSynthesis.cancel();   
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1;
+  utter.pitch = 1;
+  speechSynthesis.speak(utter);
+}
+
+
+
+</script>
+
+</body>
+</html>
